@@ -4,6 +4,7 @@ const messages = require("../utils/messages.json");
 const enums = require("../utils/enums.json");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { mailService } = require("../utils/mail-service")
 const otpGenerator = require('otp-generator')
 require("dotenv").config();
 
@@ -33,15 +34,10 @@ module.exports = {
 				password: hash,
 				role: findRole._id,
 			};
-			const savedUser = await userSchema.create(create);
-			const data = {
-				id: savedUser._id,
-				email: savedUser.email,
-			};
-			const token = jwt.sign(data, process.env.JWT_SECRET);
+			await userSchema.create(create);
 			return res
 				.status(enums.HTTP_CODE.OK)
-				.json({ success: true, message: messages.SIGNUP_SUCCESS, token });
+				.json({ success: true, message: messages.SIGNUP_SUCCESS });
 		} catch (error) {
 			return res
 				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
@@ -135,10 +131,14 @@ module.exports = {
 		const { id } = req.query;
 
 		try {
-			await userSchema.findByIdAndDelete({ _id: id })
+			await userSchema.findByIdAndUpdate(
+				{ _id: id },
+				{ isActive: false },
+				{ new: true }
+			)
 			return res
 				.status(enums.HTTP_CODE.OK)
-				.json({ success: false, message: messages.DELETE_SUCCESS });
+				.json({ success: true, message: messages.DELETE_SUCCESS });
 
 		} catch (error) {
 			return res
@@ -146,8 +146,33 @@ module.exports = {
 				.json({ success: false, message: error.message });
 		}
 	},
-	forgetPassword: async (req, res) => {
+	forgotPassword: async (req, res) => {
 		const { email } = req.body
-		const otp = otpGenerator.generate(6, { digits: true });
+		try {
+
+			// const findUser = await userSchema.findOne({ email: email });
+			// if (!findUser) {
+			// 	return res
+			// 		.status(enums.HTTP_CODE.BAD_REQUEST)
+			// 		.json({ success: false, message: messages.USER_NOT_FOUND });
+			// }
+			const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
+			// const token = jwt.sign({ id: findUser._id, email: email }, process.env.JWT_SECRET)
+			const maildata = {
+				to: email,
+				subject: "Animalll | Forgot your password",
+				// url: `http://192.168.175.191:8000/users/${token}`,
+				otp: otp
+			}
+
+			await mailService(maildata)
+			return res
+				.status(enums.HTTP_CODE.OK)
+				.json({ success: true, message: messages.EMAIL_SEND });
+		} catch (error) {
+			return res
+				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
+				.json({ success: false, message: error.message });
+		}
 	}
 };

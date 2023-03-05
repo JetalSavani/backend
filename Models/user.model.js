@@ -6,7 +6,8 @@ const userSchema = new mongoose.Schema(
 		email: { type: String },
 		password: { type: String },
 		phone: { type: Number },
-		role: { type: mongoose.Schema.Types.ObjectId, ref: "userRole" }
+		role: { type: mongoose.Schema.Types.ObjectId, ref: "userRole" },
+		isActive:{type: Boolean, default: true}
 	},
 	{
 		timestamps: true,

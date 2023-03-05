@@ -10,5 +10,6 @@
 	"NOT_AUTHORIZED":"You are not authorized.",
 	"NOT_MATCH":"Email or Password are not match",
 	"UPDATE_SUCCESSFULLY":"User updated successfully.",
-	"DELETE_SUCCESS":"User deleted successfully."
+	"DELETE_SUCCESS":"User deleted successfully.",
+	"EMAIL_SEND":"Email sent successfully."
 }

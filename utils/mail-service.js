@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 require("dotenv").config()
 module.exports = {
 
-    mailService: (email, otp) => {
+    mailService: (data) => {
 
         let mailTransporter = nodemailer.createTransport({
             service: 'gmail',
@@ -13,15 +13,15 @@ module.exports = {
         });
 
         let mailDetails = {
-            from: 'xyz@gmail.com',
-            to: 'abc@gmail.com',
-            subject: 'Test mail',
-            text: 'Node.js testing mail for GeeksforGeeks'
+            from: process.env.EMAIL_USER,
+            to: data.to,
+            subject: data.subject,
+            text: data.otp
         };
 
         mailTransporter.sendMail(mailDetails, function (err, data) {
             if (err) {
-                console.log('Error Occurs');
+                console.log('Error Occurs', err.message);
             } else {
                 console.log('Email sent successfully');
             }
