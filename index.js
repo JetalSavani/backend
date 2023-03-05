@@ -1,11 +1,11 @@
 const express = require("express");
 const app = express();
 const Cors = require("cors");
-const db = require("./database");
 const bodyParser = require("body-parser");
 const userController = require("./Controller/user.controller");
 const productController = require("./Controller/product.controller");
 const fileUpload = require("express-fileupload");
+require("./database");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -13,19 +13,24 @@ app.use(fileUpload());
 app.use(express.static("files"));
 app.use(Cors());
 
-app.post("/insert-user", userController.insertUserController);
-app.post("/login", userController.loginUsers);
-app.post("/insert-catagory", userController.insertCatagory);
-app.get("/get-catagorylist", userController.getCatagoryList);
-app.post("/insert-subcatagory", userController.insertSubCatagory);
-app.get("/get-colorlist", userController.getColorList);
-app.post("/insert-color", userController.colorInsertController);
-app.post("/insert-product", productController.insertProduct);
-app.get("/get-product" , productController.getProduct); 
-app.get("/get-subcatagorylist/:c_id", userController.getSubCategoryList);
+// Define All Routes file Here
+const userRoutes = require("./routes/user.routes")
 
-const server = app.listen(8000, () => {
-  -console.log("server started");
+// Define All Routes Here
+app.use("/users", userRoutes)
+// app.post("/insert-user", userController.insertUserController);
+// app.post("/login", userController.loginUsers);
+// app.post("/insert-catagory", userController.insertCatagory);
+// app.get("/get-catagorylist", userController.getCatagoryList);
+// app.post("/insert-subcatagory", userController.insertSubCatagory);
+// app.get("/get-colorlist", userController.getColorList);
+// app.post("/insert-color", userController.colorInsertController);
+// app.post("/insert-product", productController.insertProduct);
+// app.get("/get-product", productController.getProduct);
+// app.get("/get-subcatagorylist/:c_id", userController.getSubCategoryList);
+
+app.listen(8000, () => {
+	console.log("server started");
 });
 
 // const express = require("express");

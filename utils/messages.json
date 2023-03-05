@@ -1,0 +1,14 @@
+{
+	"SIGNUP_SUCCESS": "Sign up successfully",
+	"LOGIN_SUCCESS":"Log in successfully",
+	"EMAIL_EXISTS": "USer already exists",
+	"ROLE_NOT_FOUND": "Role not found",
+	"INVALID_TOKEN": "Inavlid Token",
+	"INVALID_TOKEN_TYPE": "Inavlid Token type",
+	"USER_NOT_FOUND": "User not found",
+	"GENERAL": "Something went wrong!!, Please try again.",
+	"NOT_AUTHORIZED":"You are not authorized.",
+	"NOT_MATCH":"Email or Password are not match",
+	"UPDATE_SUCCESSFULLY":"User updated successfully.",
+	"DELETE_SUCCESS":"User deleted successfully."
+}
