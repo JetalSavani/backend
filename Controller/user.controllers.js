@@ -15,32 +15,37 @@ module.exports = {
 	createUser: async (req, res) => {
 		const { email, name, phone, password } = req.body;
 		try {
-			const userExists = await userSchema.findOne({ email: email });
+			const userExists = await userSchema.findOne({ email });
 			if (userExists) {
 				return res
 					.status(enums.HTTP_CODE.BAD_REQUEST)
 					.json({ success: false, message: messages.EMAIL_EXISTS });
 			}
 			const salt = await bcrypt.genSalt(10);
-			const new_pwd = password;
-			const hash = await bcrypt.hash(new_pwd, salt);
-			const findRole = await userRoleSchema.findOne({ role: "user" });
+			const hash = await bcrypt.hash(password, salt);
+			const findRole = await userRoleSchema.findOne({ role: "user" }).lean();
 			if (!findRole) {
 				return res
 					.status(enums.HTTP_CODE.BAD_REQUEST)
 					.json({ success: false, message: messages.ROLE_NOT_FOUND });
 			}
 			const create = {
-				name: name,
-				email: email,
-				phone: phone,
+				name,
+				email,
+				phone,
 				password: hash,
 				role: findRole._id,
 			};
-			await userSchema.create(create);
-			return res
-				.status(enums.HTTP_CODE.OK)
-				.json({ success: true, message: messages.SIGNUP_SUCCESS });
+			const userData =  await userSchema.create(create);
+			if (userData) {
+				return res
+					.status(enums.HTTP_CODE.OK)
+					.json({ success: true, message: messages.SIGNUP_SUCCESS });
+			} else {
+				return res
+					.status(enums.HTTP_CODE.BAD_REQUEST)
+					.json({ success: false, message: messages.ROLE_NOT_FOUND });
+			}
 		} catch (error) {
 			return res
 				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
@@ -50,15 +55,14 @@ module.exports = {
 	userLogin: async (req, res) => {
 		const { email, password } = req.body;
 		try {
-			const userData = await userSchema.findOne({ email: email });
+			const userData = await userSchema.findOne({ email });
 			if (!userData) {
 				return res
 					.status(enums.HTTP_CODE.OK)
 					.json({ success: false, message: messages.USER_NOT_FOUND });
 			}
 			const userPassword = userData.password;
-			const new_pwd = password;
-			const isMatch = await bcrypt.compare(new_pwd, userPassword);
+			const isMatch = await bcrypt.compare(password, userPassword);
 			if (!isMatch) {
 				return res
 					.status(enums.HTTP_CODE.BAD_REQUEST)
@@ -81,28 +85,15 @@ module.exports = {
 	},
 	updateUser: async (req, res) => {
 		const user = req.user;
-		const { name, phone, address, city, state, pincode, country } = req.body
-
 		try {
-			const findUser = await userSchema.findById({ _id: user._id });
+			const findUser = await userSchema.findById(user._id);
 			if (!findUser) {
 				return res
 					.status(enums.HTTP_CODE.BAD_REQUEST)
 					.json({ success: false, message: messages.USER_NOT_FOUND });
 			}
-			const obj4update = {
-				$set: {
-					name: name || findUser.name,
-					phone: phone || findUser.phone,
-					address: address || findUser.address,
-					city: city || findUser.city,
-					state: state || findUser.state,
-					pincode: pincode || findUser.pincode,
-					country: country || findUser.country
-				}
-			}
 			const updateUser = await userSchema.findByIdAndUpdate(
-				{ _id: user._id },
+				user._id,
 				req.body,
 				{ new: true }
 			)
@@ -116,11 +107,11 @@ module.exports = {
 				.json({ success: false, message: error.message });
 		}
 	},
-	getAlluser: async (req, res) => {
+	getAllUser: async (req, res) => {
 
-		const getUser = await userSchema.find()
 		try {
-			if (getUser.length > 0) {
+			const getUser = await userSchema.find()
+			if (getUser) {
 				return res
 					.status(enums.HTTP_CODE.OK)
 					.json({ success: true, user: getUser });
@@ -140,15 +131,19 @@ module.exports = {
 		const { id } = req.query;
 
 		try {
-			await userSchema.findByIdAndUpdate(
-				{ _id: id },
-				{ isActive: false },
-				{ new: true }
+			const userData = await userSchema.findByIdAndUpdate(
+				id,
+				{ isActive: false }
 			)
-			return res
-				.status(enums.HTTP_CODE.OK)
-				.json({ success: true, message: messages.DELETE_SUCCESS });
-
+			if (userData) {
+				return res
+					.status(enums.HTTP_CODE.OK)
+					.json({ success: true, message: messages.DELETE_SUCCESS });
+			} else {
+				return res
+					.status(enums.HTTP_CODE.BAD_REQUEST)
+					.json({ success: false, message: messages.USER_NOT_FOUND });
+			}
 		} catch (error) {
 			return res
 				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
@@ -159,7 +154,7 @@ module.exports = {
 		const { email } = req.body
 		try {
 
-			const findUser = await userSchema.findOne({ email: email });
+			const findUser = await userSchema.findOne({ email });
 			if (!findUser) {
 				return res
 					.status(enums.HTTP_CODE.BAD_REQUEST)
@@ -167,9 +162,8 @@ module.exports = {
 			}
 			const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
 			await userSchema.findByIdAndUpdate(
-				{ _id: findUser._id },
-				{ $set: { otp: otp } },
-				{ new: true }
+				findUser._id,
+				{ $set: { otp: otp } }
 			)
 			const maildata = {
 				to: email,
@@ -192,7 +186,7 @@ module.exports = {
 		const { otp, email } = req.body
 
 		try {
-			const findUser = await userSchema.findOne({ email: email })
+			const findUser = await userSchema.findOne({ email })
 			if (!findUser) {
 				return res
 					.status(enums.HTTP_CODE.BAD_REQUEST)
@@ -226,11 +220,10 @@ module.exports = {
 			}
 
 			const salt = await bcrypt.genSalt(10);
-			const new_pwd = password;
-			const hash = await bcrypt.hash(new_pwd, salt);
+			const hash = await bcrypt.hash(password, salt);
 
 			await userSchema.findByIdAndUpdate(
-				{ _id: findUser._id },
+				findUser._id,
 				{ $set: { password: hash } },
 				{ new: true }
 			)
@@ -249,7 +242,7 @@ module.exports = {
 
 		try {
 
-			await userRoleSchema.create({ role: role })
+			await userRoleSchema.create({ role })
 			return res
 				.status(enums.HTTP_CODE.OK)
 				.json({ success: true, message: messages.ROLE_ADDED });
@@ -263,7 +256,7 @@ module.exports = {
 		const { email, oldPassword, newPassword } = req.body
 
 		try {
-			const findUser = await userSchema.findOne({ email: email })
+			const findUser = await userSchema.findOne({ email })
 			if (!findUser) {
 				return res
 					.status(enums.HTTP_CODE.BAD_REQUEST)
@@ -279,12 +272,10 @@ module.exports = {
 			}
 
 			const salt = await bcrypt.genSalt(10);
-			const new_pwd = newPassword;
-			const hash = await bcrypt.hash(new_pwd, salt);
+			const hash = await bcrypt.hash(newPassword, salt);
 			await userSchema.findByIdAndUpdate(
-				{ _id: findUser._id },
-				{ $set: { password: hash } },
-				{ new: true }
+				findUser._id,
+				{ $set: { password: hash } }
 			)
 
 			return res
@@ -302,9 +293,8 @@ module.exports = {
 event.on('OTP expire', (user) => {
 	setTimeout(async () => {
 		await userSchema.findByIdAndUpdate(
-			{ _id: user._id },
-			{ $set: { otp: null } },
-			{ new: true }
+			user._id,
+			{ $set: { otp: null } }
 		)
 	}, 60000)
 })
