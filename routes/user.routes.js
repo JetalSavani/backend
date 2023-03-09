@@ -15,7 +15,7 @@ const {
 router.post("/create-user", validatation4signup, userController.createUser)
 router.post("/login", validatation4login, userController.userLogin)
 router.put("/update-user", authUser, validatation4updateuser, userController.updateUser)
-router.get("/get-all-user", authAdmin, userController.getAlluser)
+router.get("/get-all-user", authAdmin, userController.getAllUser)
 router.delete("/delete-user", authAdmin, userController.deleteUser)
 router.post("/forgot-password", validatation4forgotpass, userController.forgotPassword)
 router.post("/verify-otp", validatation4verifyOTP, userController.verifyOTP)
