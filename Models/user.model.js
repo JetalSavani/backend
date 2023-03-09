@@ -10,10 +10,13 @@ const userSchema = new mongoose.Schema(
 		isActive: { type: Boolean, default: true },
 		otp: { type: Number, default: null },
 		address: { type: String },
-        city: { type: String },
-        state: { type: String },
-        pincode: { type: Number },
-        country: { type: String }
+		city: { type: String },
+		state: { type: String },
+		pincode: { type: Number },
+		country: { type: String },
+		bankName: { type: String },
+		ifscCode: { type: String },
+		accountNumber: { type: Number },
 	},
 	{
 		timestamps: true,
