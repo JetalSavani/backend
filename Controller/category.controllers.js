@@ -8,14 +8,14 @@ module.exports = {
 
         const { name, description } = req.body
         try {
-            const findCategory = await categorySchema.findOne({ name: name })
+            const findCategory = await categorySchema.findOne({ name })
             if (findCategory) {
                 return res
                     .status(enums.HTTP_CODE.BAD_REQUEST)
                     .json({ success: false, message: messages.CATEGORY_EXISTS });
             }
 
-            await categorySchema.create({ name: name, description: description })
+            await categorySchema.create(req.body)
             return res
                 .status(enums.HTTP_CODE.OK)
                 .json({ success: true, message: messages.CATEGORY_ADDED });
@@ -52,7 +52,7 @@ module.exports = {
         try {
 
             const { name, description } = req.body
-            const findCategory = await categorySchema.findById({ _id: id })
+            const findCategory = await categorySchema.findById(id)
             if (!findCategory) {
                 return res
                     .status(enums.HTTP_CODE.BAD_REQUEST)
@@ -65,7 +65,7 @@ module.exports = {
                 }
             }
             await categorySchema.findByIdAndUpdate(
-                { _id: id },
+                id,
                 obj4update,
                 { new: true }
             )
@@ -82,7 +82,7 @@ module.exports = {
         const { id } = req.query
 
         try {
-            const findCategory = await categorySchema.findById({ _id: id })
+            const findCategory = await categorySchema.findById(id)
             if (!findCategory) {
                 return res
                     .status(enums.HTTP_CODE.BAD_REQUEST)
@@ -90,7 +90,7 @@ module.exports = {
             }
 
             await categorySchema.findByIdAndDelete(
-                { _id: id },
+                id,
                 { $set: { isActive: false } },
                 { new: true }
             )

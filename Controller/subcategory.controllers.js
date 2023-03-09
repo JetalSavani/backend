@@ -6,16 +6,16 @@ module.exports = {
 
     addsubCategory: async (req, res) => {
 
-        const { name, categoryId } = req.body
+        const { name } = req.body
         try {
-            const findsubCategory = await subcategorySchema.findOne({ name: name, categoryId: categoryId })
+            const findsubCategory = await subcategorySchema.findOne(name)
             if (findsubCategory) {
                 return res
                     .status(enums.HTTP_CODE.BAD_REQUEST)
                     .json({ success: false, message: messages.SUBCATEGORY_EXISTS });
             }
 
-            await subcategorySchema.create({ name: name, categoryId: categoryId })
+            await subcategorySchema.create(req.body)
             return res
                 .status(enums.HTTP_CODE.OK)
                 .json({ success: true, message: messages.SUBCATEGORY_ADDED });
@@ -48,24 +48,19 @@ module.exports = {
     },
     updatesubCategory: async (req, res) => {
         const { id } = req.query
+        const { name } = req.body
 
         try {
 
-            const { name } = req.body
-            const findCategory = await subcategorySchema.findById({ _id: id })
+            const findCategory = await subcategorySchema.findById(id)
             if (!findCategory) {
                 return res
                     .status(enums.HTTP_CODE.BAD_REQUEST)
                     .json({ success: false, message: messages.SUBCATEGORY_NOT_FOUND });
             }
-            const obj4update = {
-                $set: {
-                    name: name
-                }
-            }
             await subcategorySchema.findByIdAndUpdate(
-                { _id: id },
-                obj4update,
+                id,
+                { $set: { name: name } },
                 { new: true }
             )
             return res
@@ -81,7 +76,7 @@ module.exports = {
         const { id } = req.query
 
         try {
-            const findCategory = await subcategorySchema.findById({ _id: id })
+            const findCategory = await subcategorySchema.findById(id)
             if (!findCategory) {
                 return res
                     .status(enums.HTTP_CODE.BAD_REQUEST)
@@ -89,7 +84,7 @@ module.exports = {
             }
 
             await subcategorySchema.findByIdAndDelete(
-                { _id: id },
+                id,
                 { $set: { isActive: false } },
                 { new: true }
             )

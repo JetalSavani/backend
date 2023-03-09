@@ -16,7 +16,7 @@ module.exports = {
                     .json({ success: false, message: messages.COLOR_EXISTS });
             }
 
-            await colorSchema.create({ name: name, categoryId: categoryId })
+            await colorSchema.create(req.body)
             return res
                 .status(enums.HTTP_CODE.OK)
                 .json({ success: true, message: messages.COLOR_ADDED });
