@@ -7,7 +7,13 @@ const userSchema = new mongoose.Schema(
 		password: { type: String },
 		phone: { type: Number },
 		role: { type: mongoose.Schema.Types.ObjectId, ref: "userRole" },
-		isActive:{type: Boolean, default: true}
+		isActive: { type: Boolean, default: true },
+		otp: { type: Number, default: null },
+		address: { type: String },
+        city: { type: String },
+        state: { type: String },
+        pincode: { type: Number },
+        country: { type: String }
 	},
 	{
 		timestamps: true,

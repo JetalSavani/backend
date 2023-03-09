@@ -35,5 +35,37 @@ module.exports = {
                 .status(enums.HTTP_CODE.BAD_REQUEST)
                 .json({ success: false, message: messages.INVALID_TOKEN_TYPE })
         }
+    },
+    authUser: async (req, res, next) => {
+        let token;
+        const { authorization } = req.headers;
+        if (authorization && authorization.startsWith("Bearer")) {
+            try {
+                token = authorization.split(" ")[1];
+                if (!token) {
+                    return res
+                        .status(enums.HTTP_CODE.BAD_REQUEST)
+                        .json({ success: false, message: messages.INVALID_TOKEN })
+                }
+                const user = jwt.verify(token, process.env.JWT_SECRET);
+                req.user = await userSchema.findOne({ email: user.email })
+                if (req.user) {
+                    console.log("first",req.user)
+                    next();
+                } else {
+                    return res
+                        .status(enums.HTTP_CODE.BAD_REQUEST)
+                        .json({ success: false, message: messages.USER_NOT_FOUND })
+                }
+            } catch (err) {
+                return res
+                    .status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
+                    .json({ success: false, message: messages.err.message })
+            }
+        } else {
+            return res
+                .status(enums.HTTP_CODE.BAD_REQUEST)
+                .json({ success: false, message: messages.INVALID_TOKEN_TYPE })
+        }
     }
 }

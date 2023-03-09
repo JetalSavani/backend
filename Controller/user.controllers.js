@@ -4,8 +4,11 @@ const messages = require("../utils/messages.json");
 const enums = require("../utils/enums.json");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const EventEmitter = require('events')
 const { mailService } = require("../utils/mail-service")
 const otpGenerator = require('otp-generator')
+const event = new EventEmitter()
+
 require("dotenv").config();
 
 module.exports = {
@@ -69,7 +72,7 @@ module.exports = {
 			const token = jwt.sign(data, process.env.JWT_SECRET);
 			return res
 				.status(enums.HTTP_CODE.OK)
-				.json({ success: true, message: messages.LOGIN_SUCCESS, token });
+				.json({ success: true, message: messages.LOGIN_SUCCESS, token, user: userData });
 		} catch (error) {
 			return res
 				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
@@ -77,11 +80,11 @@ module.exports = {
 		}
 	},
 	updateUser: async (req, res) => {
-		const { id } = req.query;
-		const { name, phone } = req.body
+		const user = req.user;
+		const { name, phone, address, city, state, pincode, country } = req.body
 
 		try {
-			const findUser = await userSchema.findById({ _id: id });
+			const findUser = await userSchema.findById({ _id: user._id });
 			if (!findUser) {
 				return res
 					.status(enums.HTTP_CODE.BAD_REQUEST)
@@ -90,17 +93,23 @@ module.exports = {
 			const obj4update = {
 				$set: {
 					name: name || findUser.name,
-					phone: phone || findUser.phone
+					phone: phone || findUser.phone,
+					address: address || findUser.address,
+					city: city || findUser.city,
+					state: state || findUser.state,
+					pincode: pincode || findUser.pincode,
+					country: country || findUser.country
 				}
 			}
-			await userSchema.findByIdAndUpdate(
-				{ _id: id },
-				obj4update,
+			const updateUser = await userSchema.findByIdAndUpdate(
+				{ _id: user._id },
+				req.body,
 				{ new: true }
 			)
+			console.log("updateUser", updateUser)
 			return res
 				.status(enums.HTTP_CODE.OK)
-				.json({ success: true, message: messages.UPDATE_SUCCESSFULLY });
+				.json({ success: true, message: messages.UPDATE_SUCCESSFULLY, user: updateUser });
 		} catch (error) {
 			return res
 				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
@@ -150,22 +159,26 @@ module.exports = {
 		const { email } = req.body
 		try {
 
-			// const findUser = await userSchema.findOne({ email: email });
-			// if (!findUser) {
-			// 	return res
-			// 		.status(enums.HTTP_CODE.BAD_REQUEST)
-			// 		.json({ success: false, message: messages.USER_NOT_FOUND });
-			// }
+			const findUser = await userSchema.findOne({ email: email });
+			if (!findUser) {
+				return res
+					.status(enums.HTTP_CODE.BAD_REQUEST)
+					.json({ success: false, message: messages.USER_NOT_FOUND });
+			}
 			const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
-			// const token = jwt.sign({ id: findUser._id, email: email }, process.env.JWT_SECRET)
+			await userSchema.findByIdAndUpdate(
+				{ _id: findUser._id },
+				{ $set: { otp: otp } },
+				{ new: true }
+			)
 			const maildata = {
 				to: email,
 				subject: "Animalll | Forgot your password",
-				// url: `http://192.168.175.191:8000/users/${token}`,
 				otp: otp
 			}
 
-			await mailService(maildata)
+			mailService(maildata)
+			event.emit('OTP expire', findUser)
 			return res
 				.status(enums.HTTP_CODE.OK)
 				.json({ success: true, message: messages.EMAIL_SEND });
@@ -174,5 +187,124 @@ module.exports = {
 				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
 				.json({ success: false, message: error.message });
 		}
+	},
+	verifyOTP: async (req, res) => {
+		const { otp, email } = req.body
+
+		try {
+			const findUser = await userSchema.findOne({ email: email })
+			if (!findUser) {
+				return res
+					.status(enums.HTTP_CODE.BAD_REQUEST)
+					.json({ success: false, message: messages.USER_NOT_FOUND });
+			}
+
+			if (otp !== findUser.otp) {
+				return res
+					.status(enums.HTTP_CODE.BAD_REQUEST)
+					.json({ success: false, message: messages.OTP_NOT_MATCH });
+			}
+
+			return res
+				.status(enums.HTTP_CODE.OK)
+				.json({ success: true, message: messages.OTP_MATCH });
+		} catch (error) {
+			return res
+				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
+				.json({ success: false, message: error.message });
+		}
+	},
+	verifyPassword: async (req, res) => {
+		const { password, email } = req.body
+
+		try {
+			const findUser = await userSchema.findOne({ email: email })
+			if (!findUser) {
+				return res
+					.status(enums.HTTP_CODE.BAD_REQUEST)
+					.json({ success: false, message: messages.USER_NOT_FOUND });
+			}
+
+			const salt = await bcrypt.genSalt(10);
+			const new_pwd = password;
+			const hash = await bcrypt.hash(new_pwd, salt);
+
+			await userSchema.findByIdAndUpdate(
+				{ _id: findUser._id },
+				{ $set: { password: hash } },
+				{ new: true }
+			)
+			return res
+				.status(enums.HTTP_CODE.OK)
+				.json({ success: true, message: messages.PASSWORD_CHANGE });
+		} catch (error) {
+			return res
+				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
+				.json({ success: false, message: error.message });
+		}
+	},
+	addRole: async (req, res) => {
+
+		const { role } = req.body
+
+		try {
+
+			await userRoleSchema.create({ role: role })
+			return res
+				.status(enums.HTTP_CODE.OK)
+				.json({ success: true, message: messages.ROLE_ADDED });
+		} catch (error) {
+			return res
+				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
+				.json({ success: false, message: error.message });
+		}
+	},
+	changePassword: async (req, res) => {
+		const { email, oldPassword, newPassword } = req.body
+
+		try {
+			const findUser = await userSchema.findOne({ email: email })
+			if (!findUser) {
+				return res
+					.status(enums.HTTP_CODE.BAD_REQUEST)
+					.json({ success: false, message: messages.USER_NOT_FOUND });
+			}
+
+			const nPassword = findUser.password
+			const isMatch = await bcrypt.compare(oldPassword, nPassword);
+			if (!isMatch) {
+				return res
+					.status(enums.HTTP_CODE.BAD_REQUEST)
+					.json({ success: false, message: messages.OLD_PASSWORD_WRONG });
+			}
+
+			const salt = await bcrypt.genSalt(10);
+			const new_pwd = newPassword;
+			const hash = await bcrypt.hash(new_pwd, salt);
+			await userSchema.findByIdAndUpdate(
+				{ _id: findUser._id },
+				{ $set: { password: hash } },
+				{ new: true }
+			)
+
+			return res
+				.status(enums.HTTP_CODE.OK)
+				.json({ success: true, message: messages.PASSWORD_CHANGE });
+
+		} catch (error) {
+			return res
+				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
+				.json({ success: false, message: error.message });
+		}
 	}
 };
+
+event.on('OTP expire', (user) => {
+	setTimeout(async () => {
+		await userSchema.findByIdAndUpdate(
+			{ _id: user._id },
+			{ $set: { otp: null } },
+			{ new: true }
+		)
+	}, 60000)
+})

@@ -1,13 +1,17 @@
 const mongoose = require("mongoose");
-var AutoIncrement = require("mongoose-sequence")(mongoose);
-const colorSchema = mongoose.Schema({
-  color_id: {
-    type: Number,
-  },
-  color_name: { type: String },
-});
-colorSchema.plugin(AutoIncrement, { inc_field: "color_id" });
 
+const colorSchema = new mongoose.Schema(
+	{
+		name: { type: String },
+		isActive: { type: Boolean, default: true },
+		categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "category" }
+	},
+	{
+		timestamps: true,
+		versionKey: false,
+		autoCreate: true,
+	}
+);
 
-
-module.exports = mongoose.model("colors", colorSchema);
+const newColor = new mongoose.model("color", colorSchema, "color");
+module.exports = newColor;

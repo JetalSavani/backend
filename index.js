@@ -2,8 +2,6 @@ const express = require("express");
 const app = express();
 const Cors = require("cors");
 const bodyParser = require("body-parser");
-const userController = require("./Controller/user.controller");
-const productController = require("./Controller/product.controller");
 const fileUpload = require("express-fileupload");
 require("./database");
 
@@ -15,9 +13,13 @@ app.use(Cors());
 
 // Define All Routes file Here
 const userRoutes = require("./routes/user.routes")
+const categoryRoutes = require("./routes/category.routes")
+const subCategoryRoutes = require("./routes/subcategory.routes")
 
 // Define All Routes Here
 app.use("/users", userRoutes)
+app.use("/category", categoryRoutes)
+app.use("/subcategory", subCategoryRoutes)
 // app.post("/insert-user", userController.insertUserController);
 // app.post("/login", userController.loginUsers);
 // app.post("/insert-catagory", userController.insertCatagory);

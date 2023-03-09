@@ -1,15 +1,17 @@
-
 const mongoose = require("mongoose");
-var AutoIncrement = require("mongoose-sequence")(mongoose);
 
-const catagorySchema = mongoose.Schema({
-  c_id: {
-    type: Number,
-  },
-  c_name: { 
-    type: String },
-});
+const categorySchema = new mongoose.Schema(
+	{
+		name: { type: String },
+		description: { type: String },
+		isActive: { type: Boolean, default: true }
+	},
+	{
+		timestamps: true,
+		versionKey: false,
+		autoCreate: true,
+	}
+);
 
-catagorySchema.plugin(AutoIncrement, { inc_field: "c_id" });
-
-module.exports = mongoose.model("catagories", catagorySchema);
+const newCategory = new mongoose.model("category", categorySchema, "category");
+module.exports = newCategory;
