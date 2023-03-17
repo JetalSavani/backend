@@ -29,9 +29,11 @@ module.exports = {
     },
     getcolor: async (req, res) => {
 
-        const { categoryId } = req.query
+        const { id } = req.query
         try {
-            const findColor = await colorSchema.find({ categoryId: categoryId }).populate('categoryId')
+            const criteria = {}
+            if (id) criteria = { categoryId: id }
+            const findColor = await colorSchema.find(criteria).populate('categoryId')
             if (findColor.length > 0) {
                 return res
                     .status(enums.HTTP_CODE.OK)
@@ -50,13 +52,6 @@ module.exports = {
     deleteColor: async (req, res) => {
         const { id, categoryId } = req.query
         try {
-            const findColor = await colorSchema.findOne({ _id: id, categoryId: categoryId })
-            if (!findColor) {
-                return res
-                    .status(enums.HTTP_CODE.BAD_REQUEST)
-                    .json({ success: false, message: messages.COLOR_NOT_FOUND });
-            }
-
             await colorSchema.findOneAndDelete({ _id: id, categoryId: categoryId })
             return res
                 .status(enums.HTTP_CODE.OK)

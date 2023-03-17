@@ -1,4 +1,6 @@
 const categorySchema = require("../Models/catagory.model");
+const subcategorySchema = require("../Models/subcatagory.model");
+const colorSchema = require("../Models/subcatagory.model");
 const messages = require("../utils/messages.json");
 const enums = require("../utils/enums.json");
 
@@ -6,7 +8,7 @@ module.exports = {
 
     addCategory: async (req, res) => {
 
-        const { name, description } = req.body
+        const { name } = req.body
         try {
             const findCategory = await categorySchema.findOne({ name })
             if (findCategory) {
@@ -51,7 +53,7 @@ module.exports = {
 
         try {
 
-            const { name, description } = req.body
+            const { name } = req.body
             const findCategory = await categorySchema.findById(id)
             if (!findCategory) {
                 return res
@@ -60,8 +62,7 @@ module.exports = {
             }
             const obj4update = {
                 $set: {
-                    name: name,
-                    description: description
+                    name: name
                 }
             }
             await categorySchema.findByIdAndUpdate(
@@ -82,18 +83,9 @@ module.exports = {
         const { id } = req.query
 
         try {
-            const findCategory = await categorySchema.findById(id)
-            if (!findCategory) {
-                return res
-                    .status(enums.HTTP_CODE.BAD_REQUEST)
-                    .json({ success: false, message: messages.CATEGORY_NOT_FOUND });
-            }
-
-            await categorySchema.findByIdAndDelete(
-                id,
-                { $set: { isActive: false } },
-                { new: true }
-            )
+            await categorySchema.findByIdAndDelete(id)
+            await subcategorySchema.deleteMany({ categoryId: id })
+            await colorSchema.deleteMany({ categoryId: id })
             return res
                 .status(enums.HTTP_CODE.OK)
                 .json({ success: true, message: messages.CATEGORY_DELETED });

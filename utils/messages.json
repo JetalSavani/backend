@@ -30,5 +30,11 @@
 	"COLOR_EXISTS":"Color already exists.",
 	"COLOR_ADDED":"Color added successfully.",
 	"COLOR_NOT_FOUND":"Color not found.",
-	"DELETE_COLOR":"Delete color successfully."
+	"DELETE_COLOR":"Delete color successfully.",
+	"VENDOR_CREATED":"You are now a Vendor.",
+	"SUPER_ADMIN_CREATE":"Super Admin created successfully.",
+	"PRODUCT_ADDED":"Product added successfully.",
+	"BLOG_ADDED":"Blog added successfully.",
+	"BLOG_UPDATED":"Blog updated successfully,",
+	"BLOG_DELETED":"Blog deleted successfully."
 }

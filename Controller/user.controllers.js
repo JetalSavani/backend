@@ -13,9 +13,10 @@ require("dotenv").config();
 
 module.exports = {
 	createUser: async (req, res) => {
+		console.log(req.body)
 		const { email, name, phone, password } = req.body;
 		try {
-			const userExists = await userSchema.findOne({ email });
+			const userExists = await userSchema.findOne({ email, isActive: false });
 			if (userExists) {
 				return res
 					.status(enums.HTTP_CODE.BAD_REQUEST)
@@ -36,7 +37,7 @@ module.exports = {
 				password: hash,
 				role: findRole._id,
 			};
-			const userData =  await userSchema.create(create);
+			const userData = await userSchema.create(create);
 			if (userData) {
 				return res
 					.status(enums.HTTP_CODE.OK)
@@ -55,7 +56,7 @@ module.exports = {
 	userLogin: async (req, res) => {
 		const { email, password } = req.body;
 		try {
-			const userData = await userSchema.findOne({ email });
+			const userData = await userSchema.findOne({ email }).populate("role");
 			if (!userData) {
 				return res
 					.status(enums.HTTP_CODE.OK)
@@ -72,6 +73,7 @@ module.exports = {
 			const data = {
 				id: userData._id,
 				email: userData.email,
+				role: userData.role.role
 			};
 			const token = jwt.sign(data, process.env.JWT_SECRET);
 			return res
@@ -97,7 +99,6 @@ module.exports = {
 				req.body,
 				{ new: true }
 			)
-			console.log("updateUser", updateUser)
 			return res
 				.status(enums.HTTP_CODE.OK)
 				.json({ success: true, message: messages.UPDATE_SUCCESSFULLY, user: updateUser });
@@ -163,7 +164,8 @@ module.exports = {
 			const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
 			await userSchema.findByIdAndUpdate(
 				findUser._id,
-				{ $set: { otp: otp } }
+				{ $set: { otp: otp } },
+				{ new: true }
 			)
 			const maildata = {
 				to: email,
@@ -253,7 +255,7 @@ module.exports = {
 		}
 	},
 	changePassword: async (req, res) => {
-		const { email, oldPassword, newPassword } = req.body
+		const { email, oldPassword, password } = req.body
 
 		try {
 			const findUser = await userSchema.findOne({ email })
@@ -272,12 +274,11 @@ module.exports = {
 			}
 
 			const salt = await bcrypt.genSalt(10);
-			const hash = await bcrypt.hash(newPassword, salt);
+			const hash = await bcrypt.hash(password, salt);
 			await userSchema.findByIdAndUpdate(
 				findUser._id,
 				{ $set: { password: hash } }
 			)
-
 			return res
 				.status(enums.HTTP_CODE.OK)
 				.json({ success: true, message: messages.PASSWORD_CHANGE });
@@ -287,6 +288,54 @@ module.exports = {
 				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
 				.json({ success: false, message: error.message });
 		}
+	},
+	createVendor: async (req, res) => {
+		const { bankName, accountNumber, ifscCode } = req.body
+
+		try {
+			const findUser = await userSchema.findById(req.user._id)
+			if (!findUser) {
+				return res
+					.status(enums.HTTP_CODE.BAD_REQUEST)
+					.json({ success: false, message: messages.USER_NOT_FOUND });
+			}
+			const findRole = await userRoleSchema.findOne({ role: "vendor" })
+			if (!findRole) {
+				return res
+					.status(enums.HTTP_CODE.BAD_REQUEST)
+					.json({ success: false, message: messages.ROLE_NOT_FOUND });
+			}
+			const obj4update = {
+				bankName,
+				accountNumber,
+				ifscCode,
+				role: findRole._id
+			}
+			const createVendor = await userSchema.findByIdAndUpdate(
+				req.user._id,
+				obj4update,
+				{ new: true }
+			)
+			if (createVendor) {
+				return res
+					.status(enums.HTTP_CODE.OK)
+					.json({ success: true, message: messages.VENDOR_CREATED, user: createVendor });
+			} else {
+				return res
+					.status(enums.HTTP_CODE.BAD_REQUEST)
+					.json({ success: false, message: messages.GENERAL });
+			}
+		} catch (error) {
+			return res
+				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
+				.json({ success: false, message: error.message });
+		}
+	},
+	uploadImage:async(req, res)=>{
+		const file = req.files.file?.data;
+		console.log(file)
+		let data = "data:" + req.files.file.mimetype + ";base64," + Buffer.from(file).toString('base64');
+		res.status(200).json({data});
 	}
 };
 
@@ -294,7 +343,8 @@ event.on('OTP expire', (user) => {
 	setTimeout(async () => {
 		await userSchema.findByIdAndUpdate(
 			user._id,
-			{ $set: { otp: null } }
+			{ $set: { otp: null } },
+			{ new: true }
 		)
 	}, 60000)
 })

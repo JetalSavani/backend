@@ -9,7 +9,8 @@ const {
     validatation4forgotpass,
     validatation4verifyOTP,
     validatation4verifypassword,
-    validatation4changepassword
+    validatation4changepassword,
+    validatation4createvendor 
 } = require("../utils/joi.validate")
 
 router.post("/create-user", validatation4signup, userController.createUser)
@@ -22,5 +23,6 @@ router.post("/verify-otp", validatation4verifyOTP, userController.verifyOTP)
 router.post("/verify-password", validatation4verifypassword, userController.verifyPassword)
 router.post("/change-password", validatation4changepassword, userController.changePassword)
 router.post("/add-role", authAdmin, userController.addRole)
-// router.post("/create-vendor", authUser, userController.createVendor)
+router.post("/create-vendor", authUser, validatation4createvendor, userController.createVendor)
+router.post("/upload-image", userController.uploadImage)
 module.exports = router

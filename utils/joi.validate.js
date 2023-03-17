@@ -41,9 +41,9 @@ module.exports = {
             address: Joi.string(),
             city: Joi.string(),
             state: Joi.string(),
-            pincode: Joi.number().allow(null,""),
+            pincode: Joi.number().allow(null, ""),
             country: Joi.string(),
-            phone: Joi.number().allow(null,""),
+            phone: Joi.number().allow(null, ""),
         });
 
         let { error } = schema.validate(req.body);
@@ -102,7 +102,8 @@ module.exports = {
     validatation4changepassword: (req, res, next) => {
         let schema = Joi.object().keys({
             email: Joi.string().email().required(),
-            password: Joi.string().required()
+            password: Joi.string().required(),
+            oldPassword: Joi.string().required(),
         });
 
         let { error } = schema.validate(req.body);
@@ -117,8 +118,7 @@ module.exports = {
     },
     validatation4addcategory: (req, res, next) => {
         let schema = Joi.object().keys({
-            name: Joi.string().required(),
-            description: Joi.string().required()
+            name: Joi.string().required()
         });
 
         let { error } = schema.validate(req.body);
@@ -164,12 +164,10 @@ module.exports = {
     },
     validatation4updatecategory: (req, res, next) => {
         let schema = Joi.object().keys({
-            name: Joi.string(),
-            description: Joi.string()
+            name: Joi.string()
         });
 
         let { error } = schema.validate(req.body);
-
         if (error) {
             return res
                 .status(enums.HTTP_CODE.BAD_REQUEST)
@@ -194,5 +192,130 @@ module.exports = {
             next();
         }
     },
+    validatation4createvendor: (req, res, next) => {
+        let schema = Joi.object().keys({
+            bankName: Joi.string().required(),
+            accountNumber: Joi.number().required(),
+            ifscCode: Joi.string().required()
+        });
+
+        let { error } = schema.validate(req.body);
+
+        if (error) {
+            return res
+                .status(enums.HTTP_CODE.BAD_REQUEST)
+                .json({ success: false, message: error.details[0].message });
+        } else {
+            next();
+        }
+    },
+    validatation4loginadmin: (req, res, next) => {
+        let schema = Joi.object().keys({
+            email: Joi.string().email().required(),
+            password: Joi.string().required()
+        });
+
+        let { error } = schema.validate(req.body);
+
+        if (error) {
+            return res
+                .status(enums.HTTP_CODE.BAD_REQUEST)
+                .json({ success: false, message: error.details[0].message });
+        } else {
+            next();
+        }
+    },
+    validatation4addproduct: (req, res, next) => {
+        let schema = Joi.object().keys({
+            animalType: Joi.string().required(),
+            categoryId: Joi.string().required(),
+            breedType: Joi.string().required(),
+            age: Joi.string().required(),
+            weight: Joi.string().required(),
+            price: Joi.string().required(),
+            desc: Joi.string().required(),
+            color: Joi.string().required(),
+            city: Joi.string().required(),
+            state: Joi.string().required(),
+            phone: Joi.number().required(),
+            milk: Joi.string(),
+            isCalf: Joi.boolean(),
+            lactation: Joi.string(),
+            calfAge: Joi.string(),
+            calfGender: Joi.string()
+        });
+
+        let { error } = schema.validate(req.body);
+
+        if (error) {
+            return res
+                .status(enums.HTTP_CODE.BAD_REQUEST)
+                .json({ success: false, message: error.details[0].message });
+        } else {
+            next();
+        }
+    },
+    validatation4updateproduct: (req, res, next) => {
+        let schema = Joi.object().keys({
+            animalType: Joi.string(),
+            categoryId: Joi.string(),
+            breedType: Joi.string(),
+            age: Joi.string(),
+            weight: Joi.string(),
+            price: Joi.string(),
+            desc: Joi.string(),
+            color: Joi.string(),
+            city: Joi.string(),
+            state: Joi.string(),
+            phone: Joi.number(),
+            milk: Joi.string(),
+            isCalf: Joi.boolean(),
+            lactation: Joi.string(),
+            calfAge: Joi.string(),
+            calfGender: Joi.string()
+        });
+
+        let { error } = schema.validate(req.body);
+
+        if (error) {
+            return res
+                .status(enums.HTTP_CODE.BAD_REQUEST)
+                .json({ success: false, message: error.details[0].message });
+        } else {
+            next();
+        }
+    },
+    validatation4addBlog: (req, res, next) => {
+        let schema = Joi.object().keys({
+            title: Joi.string().required(),
+            desc: Joi.string().required()
+        });
+
+        let { error } = schema.validate(req.body);
+
+        if (error) {
+            return res
+                .status(enums.HTTP_CODE.BAD_REQUEST)
+                .json({ success: false, message: error.details[0].message });
+        } else {
+            next();
+        }
+    },
+    validatation4updateBlog: (req, res, next) => {
+        let schema = Joi.object().keys({
+            title: Joi.string(),
+            desc: Joi.string()
+        });
+
+        let { error } = schema.validate(req.body);
+
+        if (error) {
+            return res
+                .status(enums.HTTP_CODE.BAD_REQUEST)
+                .json({ success: false, message: error.details[0].message });
+        } else {
+            next();
+        }
+    }
 
 }

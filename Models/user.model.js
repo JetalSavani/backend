@@ -14,9 +14,9 @@ const userSchema = new mongoose.Schema(
 		state: { type: String },
 		pincode: { type: Number },
 		country: { type: String },
-		bankName: { type: String },
-		ifscCode: { type: String },
-		accountNumber: { type: Number },
+		bankName: { type: String, default: null },
+		ifscCode: { type: String, default: null },
+		accountNumber: { type: Number, default: null },
 	},
 	{
 		timestamps: true,

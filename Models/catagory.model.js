@@ -2,9 +2,7 @@ const mongoose = require("mongoose");
 
 const categorySchema = new mongoose.Schema(
 	{
-		name: { type: String },
-		description: { type: String },
-		isActive: { type: Boolean, default: true }
+		name: { type: String }
 	},
 	{
 		timestamps: true,

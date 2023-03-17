@@ -10,16 +10,26 @@ app.use(bodyParser.json());
 app.use(fileUpload());
 app.use(express.static("files"));
 app.use(Cors());
+app.use('/upload',express.static('upload'));
 
 // Define All Routes file Here
 const userRoutes = require("./routes/user.routes")
 const categoryRoutes = require("./routes/category.routes")
 const subCategoryRoutes = require("./routes/subcategory.routes")
+const superAdminRoutes = require("./routes/superAdmin.routes")
+const colorRoutes = require("./routes/color.routes")
+const productRoutes = require("./routes/product.routes")
+const blogRoutes = require("./routes/blog.routes")
 
 // Define All Routes Here
+app.get('/',()=>{console.log("welcome to Animal")})
 app.use("/users", userRoutes)
 app.use("/category", categoryRoutes)
 app.use("/subcategory", subCategoryRoutes)
+app.use("/superAdmin", superAdminRoutes)
+app.use("/color", colorRoutes)
+app.use("/product", productRoutes)
+app.use("/blog", blogRoutes)
 // app.post("/insert-user", userController.insertUserController);
 // app.post("/login", userController.loginUsers);
 // app.post("/insert-catagory", userController.insertCatagory);

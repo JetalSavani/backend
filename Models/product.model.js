@@ -1,42 +1,37 @@
 const mongoose = require("mongoose");
 
-const productSchema = mongoose.Schema({
-  c_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "catagories",
-  },
-  s_c_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "subcatagories",
-  },
-  price: {
-    type: Number,
-  },
-  description: {
-    type: String,
-  },
-  age: {
-    type: Number,
-  },
-  weight: {
-    type: Number,
-  },
-  color_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "colors",
-  },
-  // gender: {
-  //   type: String,
-  // },
-  seller_mobile: {
-    type: Number,
-  },
-  milk: {
-    type: Number,
-  },
-  lactation: {
-    type: Number,
-  },
-});
+const productSchema = new mongoose.Schema(
+	{
+		animalType: { type: String, required: true },
+		categoryId: { type: mongoose.Schema.Types.ObjectId, ref: "category", required: true },
+		vendorId: { type: mongoose.Schema.Types.ObjectId, ref: "user", required: true },
+		breedType: { type: String, required: true },
+		age: { type: Number, required: true },
+		weight: { type: String, required: true },
+		price: { type: String, required: true },
+		desc: { type: String, required: true },
+		color: { type: String, required: true },
+		city: { type: String, required: true },
+		state: { type: String, required: true },
+		phone: { type: Number, required: true },
+		milk: { type: String },
+		isCalf: { type: Boolean, default: false },
+		isApprove: { type: String, default: "Pending" },
+		lactation: { type: String },
+		calfAge: { type: String },
+		calfGender: { type: String },
+		// frontPhoto: { type: String, required: true },
+		// backPhoto: { type: String, required: true },
+		// lumpiCertificate: { type: String, required: true },
+		// generalReport: { type: String, required: true },
+		isPurchase: { type: Boolean, default: false }
+	},
+	{
+		timestamps: true,
+		versionKey: false,
+		autoCreate: true,
+	}
+);
 
-module.exports = mongoose.model("products", productSchema);
+const newProduct = new mongoose.model("product", productSchema, "product");
+module.exports = newProduct;
