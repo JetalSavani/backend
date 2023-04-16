@@ -8,6 +8,7 @@ module.exports = {
             email: Joi.string().email().required(),
             name: Joi.string().required(),
             phone: Joi.any(),
+            image: Joi.string(),
             password: Joi.string().required()
         });
 
@@ -43,6 +44,7 @@ module.exports = {
             state: Joi.string(),
             pincode: Joi.number().allow(null, ""),
             country: Joi.string(),
+            image: Joi.string(),
             phone: Joi.number().allow(null, ""),
         });
 
@@ -237,12 +239,16 @@ module.exports = {
             color: Joi.string().required(),
             city: Joi.string().required(),
             state: Joi.string().required(),
+            frontPhoto: Joi.string().required(),
+            backPhoto: Joi.string().required(),
+            lumpiCertificate: Joi.string().required(),
+            generalReport: Joi.string().required(),
             phone: Joi.number().required(),
-            milk: Joi.string(),
-            isCalf: Joi.boolean(),
-            lactation: Joi.string(),
-            calfAge: Joi.string(),
-            calfGender: Joi.string()
+            milk: Joi.string().allow(null, ""),
+            isCalf: Joi.boolean().allow(null, ""),
+            lactation: Joi.string().allow(null, ""),
+            calfAge: Joi.string().allow(null, ""),
+            calfGender: Joi.string().allow(null, "")
         });
 
         let { error } = schema.validate(req.body);
@@ -270,9 +276,13 @@ module.exports = {
             phone: Joi.number(),
             milk: Joi.string(),
             isCalf: Joi.boolean(),
+            frontPhoto: Joi.string(),
+            backPhoto: Joi.string(),
+            lumpiCertificate: Joi.string(),
+            generalReport: Joi.string(),
             lactation: Joi.string(),
             calfAge: Joi.string(),
-            calfGender: Joi.string()
+            calfGender: Joi.string().allow(null, "")
         });
 
         let { error } = schema.validate(req.body);
@@ -288,7 +298,9 @@ module.exports = {
     validatation4addBlog: (req, res, next) => {
         let schema = Joi.object().keys({
             title: Joi.string().required(),
-            desc: Joi.string().required()
+            desc: Joi.string().required(),
+            image: Joi.string().required(),
+            author: Joi.string().required(),
         });
 
         let { error } = schema.validate(req.body);
@@ -304,7 +316,27 @@ module.exports = {
     validatation4updateBlog: (req, res, next) => {
         let schema = Joi.object().keys({
             title: Joi.string(),
-            desc: Joi.string()
+            desc: Joi.string(),
+            image: Joi.string(),
+            author: Joi.string(),
+        });
+
+        let { error } = schema.validate(req.body);
+
+        if (error) {
+            return res
+                .status(enums.HTTP_CODE.BAD_REQUEST)
+                .json({ success: false, message: error.details[0].message });
+        } else {
+            next();
+        }
+    },
+    validatation4addservice: async (req, res, next) => {
+        let schema = Joi.object().keys({
+            email: Joi.string().email().required(),
+            type: Joi.string().required(),
+            image: Joi.string().required(),
+            data: Joi.object().required()
         });
 
         let { error } = schema.validate(req.body);

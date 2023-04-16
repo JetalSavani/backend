@@ -1,6 +1,6 @@
 const categorySchema = require("../Models/catagory.model");
 const subcategorySchema = require("../Models/subcatagory.model");
-const colorSchema = require("../Models/subcatagory.model");
+const colorSchema = require("../Models/color.model");
 const messages = require("../utils/messages.json");
 const enums = require("../utils/enums.json");
 

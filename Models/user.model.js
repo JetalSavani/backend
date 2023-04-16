@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema(
 		email: { type: String },
 		password: { type: String },
 		phone: { type: Number },
+		image: { type: String },
 		role: { type: mongoose.Schema.Types.ObjectId, ref: "userRole" },
 		isActive: { type: Boolean, default: true },
 		otp: { type: Number, default: null },

@@ -36,5 +36,15 @@
 	"PRODUCT_ADDED":"Product added successfully.",
 	"BLOG_ADDED":"Blog added successfully.",
 	"BLOG_UPDATED":"Blog updated successfully,",
-	"BLOG_DELETED":"Blog deleted successfully."
+	"BLOG_DELETED":"Blog deleted successfully.",
+	"SUCCESS":"Success",
+	"FAILED":"Failed",
+	"SERVICE_EXISTS": "Service already exists.",
+	"SERVICE_ADDED": "Service added successfully.",
+	"SERVICE_UPDATED":"Service updated successfully.",
+	"SERVICE_DELETED":"Service deleted successfully.",
+	"SERVICE_NOT_FOUND":"Service not found.",
+	"INVALID_FILE_TYPE":"Invalid file type.",
+	"INVALID_FILE_SIZE":"Image size less then 1 MB.",
+	"IMAGE_REQUIRE":"Image is required."
 }

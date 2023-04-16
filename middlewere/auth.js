@@ -18,6 +18,7 @@ module.exports = {
                         .json({ success: false, message: messages.INVALID_TOKEN })
                 }
                 const user = jwt.verify(token, process.env.JWT_SECRET);
+                console.log(user)
                 req.user = await userSchema.findById(user.id).populate("role");
                 if (!await roleSchema.findById(req.user.role._id)) {
                     return res
@@ -54,9 +55,8 @@ module.exports = {
                         .json({ success: false, message: messages.INVALID_TOKEN })
                 }
                 const user = jwt.verify(token, process.env.JWT_SECRET);
-                // console.log(
+                    console.log(user)
                 req.user = await userSchema.findById(user.id).populate("role");
-                // console.log(req.user)
                 if (!await roleSchema.findById(req.user.role._id)) {
                     return res
                         .status(enums.HTTP_CODE.BAD_REQUEST)
@@ -92,6 +92,7 @@ module.exports = {
                         .json({ success: false, message: messages.INVALID_TOKEN })
                 }
                 const user = jwt.verify(token, process.env.JWT_SECRET);
+                console.log(user)
                 req.user = await userSchema.findOne({ email: user.email }).populate("role")
                 if (!await roleSchema.findById(req.user.role._id)) {
                     return res

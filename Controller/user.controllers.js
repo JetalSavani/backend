@@ -13,14 +13,19 @@ require("dotenv").config();
 
 module.exports = {
 	createUser: async (req, res) => {
-		console.log(req.body)
 		const { email, name, phone, password } = req.body;
 		try {
-			const userExists = await userSchema.findOne({ email, isActive: false });
+			let userExists = await userSchema.findOne({ email: email });
 			if (userExists) {
-				return res
-					.status(enums.HTTP_CODE.BAD_REQUEST)
-					.json({ success: false, message: messages.EMAIL_EXISTS });
+				if (userExists.isActive) {
+					return res
+						.status(enums.HTTP_CODE.BAD_REQUEST)
+						.json({ success: false, message: messages.EMAIL_EXISTS });
+				} else {
+					return res
+						.status(enums.HTTP_CODE.BAD_REQUEST)
+						.json({ success: false, message: messages.NOT_AUTHORIZED });
+				}
 			}
 			const salt = await bcrypt.genSalt(10);
 			const hash = await bcrypt.hash(password, salt);
@@ -56,7 +61,7 @@ module.exports = {
 	userLogin: async (req, res) => {
 		const { email, password } = req.body;
 		try {
-			const userData = await userSchema.findOne({ email }).populate("role");
+			const userData = await userSchema.findOne({ email: email, isActive: true }).populate("role");
 			if (!userData) {
 				return res
 					.status(enums.HTTP_CODE.OK)
@@ -146,6 +151,7 @@ module.exports = {
 					.json({ success: false, message: messages.USER_NOT_FOUND });
 			}
 		} catch (error) {
+			console.log(error)
 			return res
 				.status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
 				.json({ success: false, message: error.message });
@@ -170,10 +176,11 @@ module.exports = {
 			const maildata = {
 				to: email,
 				subject: "Animalll | Forgot your password",
-				otp: otp
+				otp: otp,
+				name: findUser.name
 			}
 
-			mailService(maildata)
+			await mailService(maildata)
 			event.emit('OTP expire', findUser)
 			return res
 				.status(enums.HTTP_CODE.OK)
@@ -331,11 +338,10 @@ module.exports = {
 				.json({ success: false, message: error.message });
 		}
 	},
-	uploadImage:async(req, res)=>{
+	uploadImage: async (req, res) => {
 		const file = req.files.file?.data;
-		console.log(file)
 		let data = "data:" + req.files.file.mimetype + ";base64," + Buffer.from(file).toString('base64');
-		res.status(200).json({data});
+		res.status(200).json({ data });
 	}
 };
 

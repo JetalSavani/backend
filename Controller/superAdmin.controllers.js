@@ -32,7 +32,6 @@ module.exports = {
         }
     },
     superAdminLogin: async (req, res) => {
-        console.log(req.body)
         const { email, password } = req.body
 
         try {
@@ -52,14 +51,14 @@ module.exports = {
 
             const data = {
                 id: user._id,
-                role: user.role.role
+                role: user.role.role,
+                email: user.email
             }
             const token = jwt.sign(data, process.env.JWT_SECRET);
             return res
                 .status(enums.HTTP_CODE.OK)
                 .json({ success: true, message: messages.LOGIN_SUCCESS, token, user: user });
         } catch (error) {
-            console.log(error)
             return res
                 .status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
                 .json({ success: false, message: error.message });
@@ -67,7 +66,7 @@ module.exports = {
     },
     getAllUser: async (req, res) => {
         try {
-            const getUser = await userSchema.find().populate("role").lean()
+            const getUser = await userSchema.find({ isActive: true }).populate("role").lean()
             let newUser = []
             if (getUser.length > 0) {
                 newUser = getUser.filter((x) => x.role.role !== "superAdmin")
@@ -80,6 +79,7 @@ module.exports = {
                 .status(enums.HTTP_CODE.INTERNAL_SERVER_ERROR)
                 .json({ success: false, message: error.message });
         }
-    }
+    },
+
 
 }
